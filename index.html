@@ -136,6 +136,13 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .mtn-front{z-index:5;bottom:-4%}
 .hero-content{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 var(--gut);padding-bottom:24vh}
 .hero-kicker{margin-bottom:20px}
+/* Объявление из «Пульта сайта» */
+.announce{display:inline-flex;align-items:center;gap:10px;max-width:min(560px,100%);margin-bottom:22px;padding:10px 18px 10px 14px;border-radius:999px;background:#fff;color:var(--navy);font-weight:700;font-size:15px;line-height:1.3;text-align:left;box-shadow:0 14px 30px -18px rgba(20,35,100,.6);border:1px solid var(--line)}
+.announce[hidden]{display:none}
+.announce[href]::after{content:"→";color:var(--blue);margin-left:2px}
+.announce i{flex:none;width:10px;height:10px;border-radius:50%;background:#e5484d;box-shadow:0 0 0 0 rgba(229,72,77,.6);animation:pulse 1.6s infinite}
+@keyframes pulse{70%{box-shadow:0 0 0 10px rgba(229,72,77,0)}100%{box-shadow:0 0 0 0 rgba(229,72,77,0)}}
+@media (max-width:700px){.announce{font-size:13px}}
 .hero-title{font-size:clamp(72px,17vw,260px);line-height:.85;display:flex;overflow:hidden;padding:.04em .02em 0}
 .hero-title span{display:inline-block;background:linear-gradient(180deg,#3557d8 0%,#283873 55%,#1c2860 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
 .hero-sub{font-family:var(--display);font-size:clamp(16px,2vw,24px);letter-spacing:.35em;text-transform:uppercase;margin-top:16px;color:var(--navy);font-weight:500}
@@ -548,6 +555,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
   </div>
 
   <div class="hero-content">
+    <a class="announce" id="announce" hidden><i></i><span></span></a>
     <div class="eyebrow hero-kicker">Бойцовский клуб · Кропоткин</div>
     <h1 class="h-display hero-title" aria-label="Вершина">
       <span>В</span><span>Е</span><span>Р</span><span>Ш</span><span>И</span><span>Н</span><span>А</span>
@@ -983,6 +991,10 @@ const CONFIG = {
   telegram: 'https://t.me/mma_vershina_kropotkin',
   vk: 'https://vk.com/mma_vershina_kropotkin',
   phone: '+79892847753',
+  // Ссылка на «Пульт сайта» (Google Apps Script → Развернуть → URL веб-приложения, оканчивается на /exec).
+  // Сайт берёт оттуда объявление, расписание, новости, достижения, галерею и фото.
+  // Пусто или пульт недоступен — сайт показывает данные, зашитые в код ниже.
+  apiUrl: '',
   waText: 'Здравствуйте! Хочу записаться на пробную тренировку в «Вершину».'
 };
 
@@ -1002,13 +1014,17 @@ const SCHEDULE = {
     {name: 'Бокс',         age: '14+', lvl: 'Все',  rows: [['Вт, Чт', '19:00–20:30'], ['Сб', '18:00–19:30']]}
   ]
 };
-for (const k in SCHEDULE) {
-  document.getElementById('g-' + k).innerHTML = SCHEDULE[k].map(g => `
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
+function renderSchedule(data) {
+  for (const k of ['mma', 'box']) {
+    document.getElementById('g-' + k).innerHTML = (data[k] || []).map(g => `
     <div class="grp">
-      <div class="grp-h"><b>${g.name}<small>${g.age}</small></b><span class="grp-lvl${g.lvl === 'Проф' ? ' pro' : ''}">${g.lvl}</span></div>
-      <div class="grp-b">${g.rows.map(r => `<div class="grp-row"><span>${r[0]}</span><strong>${r[1]}</strong></div>`).join('')}</div>
+      <div class="grp-h"><b>${esc(g.name)}<small>${esc(g.age)}</small></b>${g.lvl ? `<span class="grp-lvl${/проф/i.test(g.lvl) ? ' pro' : ''}">${esc(g.lvl)}</span>` : ''}</div>
+      <div class="grp-b">${g.rows.map(r => `<div class="grp-row"><span>${esc(r[0])}</span><strong>${esc(r[1])}</strong></div>`).join('')}</div>
     </div>`).join('');
+  }
 }
+renderSchedule(SCHEDULE);
 
 const waLink = (t) => `https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(t || CONFIG.waText)}`;
 const ext = (sel, href) => document.querySelectorAll(sel).forEach(a => {
@@ -1074,6 +1090,93 @@ document.querySelectorAll('.qa').forEach(q => {
     setTimeout(() => window.ScrollTrigger && ScrollTrigger.refresh(), 600);
   });
 });
+
+/* ===== Данные из «Пульта сайта» (Google Таблица через Apps Script) ===== */
+(() => {
+  if (!CONFIG.apiUrl) return;
+  const $ = s => document.querySelector(s);
+  // Фото с Google Диска: если основной адрес не открылся — пробуем запасной
+  const driveId = u => (String(u).match(/(?:\/d\/|[?&]id=)([\w-]{20,})/) || [])[1];
+  const fixImg = img => {
+    img.addEventListener('error', () => {
+      const id = driveId(img.src);
+      if (id && !img.dataset.fallback) { img.dataset.fallback = 1; img.src = `https://drive.google.com/thumbnail?id=${id}&sz=w1600`; }
+    }, {once: true});
+    return img;
+  };
+  const setImg = (img, url, alt) => { if (!img || !url) return; fixImg(img); img.src = url; if (alt) img.alt = alt; };
+  const icons = [
+    '<path d="M6 7v10M18 7v10M3 10v4M21 10v4M6 12h12"/>',
+    '<path d="M7 4h7a4 4 0 0 1 4 4v5a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3V6a2 2 0 0 1 2-2zM8 16v4h8v-4"/>',
+    '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/>'
+  ];
+
+  function apply(d) {
+    // Объявление на первом экране
+    const a = $('#announce');
+    if (d.announce && d.announce.show && d.announce.text) {
+      a.querySelector('span').textContent = d.announce.text;
+      if (d.announce.link) { a.href = d.announce.link; a.target = '_blank'; a.rel = 'noopener'; } else a.removeAttribute('href');
+      a.hidden = false;
+    } else a.hidden = true;
+
+    // Расписание
+    if (d.schedule && d.schedule.length) {
+      const s = {mma: [], box: []};
+      d.schedule.forEach(g => (/бокс/i.test(g.dir) ? s.box : s.mma).push({name: g.name, age: g.age, lvl: g.lvl, rows: g.slots}));
+      renderSchedule(s);
+    }
+    if (d.extras && d.extras.length) {
+      $('.sched-extra').innerHTML = d.extras.map((x, i) => `<div class="xbox"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${icons[i % icons.length]}</svg></i><div><b>${esc(x.title)}</b><span>${esc(x.text)}</span></div></div>`).join('');
+    }
+
+    // Новости
+    if (d.news && d.news.length) {
+      $('.news').innerHTML = d.news.map(n => {
+        const tag = n.link ? `a href="${esc(n.link)}" target="_blank" rel="noopener"` : 'div';
+        return `<${tag} class="post"><div class="post-img">${n.photo ? `<img src="${esc(n.photo)}" alt="" decoding="async">` : ''}</div><div class="post-date">${esc(n.date)}</div><h4>${esc(n.title)}</h4></${n.link ? 'a' : 'div'}>`;
+      }).join('');
+      document.querySelectorAll('.post-img img').forEach(fixImg);
+    }
+
+    // Достижения
+    if (d.achievements && d.achievements.length) {
+      $('.ach-list').innerHTML = d.achievements.map(r => {
+        const open = r.link ? `<a class="ach-row" href="${esc(r.link)}" target="_blank" rel="noopener"` : '<div class="ach-row"';
+        return `${open} data-img="${esc(r.photo || '')}"><div class="ach-year">${esc(r.date)}</div><div class="ach-name">${esc(r.name)}</div><div class="ach-muted">${esc(r.details)}</div><div class="ach-place">${esc(r.result)}</div></${r.link ? 'a' : 'div'}>`;
+      }).join('');
+      const legend = $('.ach-legend');
+      if (legend) legend.hidden = !d.achievements.some(r => /\d\s*·\s*\d/.test(r.result));
+    }
+
+    // Галерея: до 7 фото, лишние ячейки прячем
+    if (d.gallery && d.gallery.length) {
+      document.querySelectorAll('.g').forEach((fig, i) => {
+        const item = d.gallery[i];
+        fig.style.display = item ? '' : 'none';
+        if (item) setImg(fig.querySelector('img'), item.photo, item.caption);
+      });
+    }
+
+    // Фото разделов
+    const p = d.photos || {};
+    setImg($('.about-photo img'), p.team);
+    const imgs = document.querySelectorAll('.coach-img img');
+    setImg(imgs[0], p.denis); setImg(imgs[1], p.anton);
+    const bgs = document.querySelectorAll('.dir-bg');
+    if (p.mma && bgs[0]) bgs[0].style.setProperty('--ph', `url("${p.mma}") center/cover`);
+    if (p.box && bgs[1]) bgs[1].style.setProperty('--ph', `url("${p.box}") center/cover`);
+
+    if (window.ScrollTrigger) ScrollTrigger.refresh();
+  }
+
+  const ctrl = new AbortController();
+  setTimeout(() => ctrl.abort(), 10000);
+  fetch(CONFIG.apiUrl + (CONFIG.apiUrl.includes('?') ? '&' : '?') + 'data=1', {signal: ctrl.signal})
+    .then(r => r.json())
+    .then(d => { if (d && d.ok) apply(d); })
+    .catch(e => console.warn('Пульт сайта недоступен — показываю встроенные данные.', e));
+})();
 
 /* ===== Motion ===== */
 const preloader = document.getElementById('preloader');
@@ -1317,11 +1420,16 @@ if (!window.gsap || !window.ScrollTrigger) {
     const prev = document.createElement('div'); prev.className = 'ach-prev'; prev.innerHTML = '<img alt="">';
     document.body.appendChild(prev);
     const px = gsap.quickTo(prev, 'x', {duration: .5, ease: 'power3'}), py = gsap.quickTo(prev, 'y', {duration: .5, ease: 'power3'});
-    document.querySelectorAll('.ach-row').forEach(r => {
-      r.addEventListener('mouseenter', () => { prev.firstChild.src = r.dataset.img; gsap.to(prev, {opacity: 1, scale: 1, duration: .4, ease: 'power3.out'}); });
-      r.addEventListener('mouseleave', () => gsap.to(prev, {opacity: 0, scale: .6, duration: .3}));
-      r.addEventListener('mousemove', e => { px(e.clientX + 30); py(e.clientY - 100); });
+    // через делегирование — работает и для строк, пришедших из Google Таблицы
+    const list = document.querySelector('.ach-list');
+    list.addEventListener('mouseover', e => {
+      const r = e.target.closest('.ach-row');
+      if (!r || !r.dataset.img) return gsap.to(prev, {opacity: 0, scale: .6, duration: .3});
+      if (prev.firstChild.getAttribute('src') !== r.dataset.img) prev.firstChild.src = r.dataset.img;
+      gsap.to(prev, {opacity: 1, scale: 1, duration: .4, ease: 'power3.out', overwrite: 'auto'});
     });
+    list.addEventListener('mouseleave', () => gsap.to(prev, {opacity: 0, scale: .6, duration: .3, overwrite: 'auto'}));
+    list.addEventListener('mousemove', e => { px(e.clientX + 30); py(e.clientY - 100); });
   }
 
   document.querySelectorAll('.coach-img').forEach(c => gsap.fromTo(c.firstElementChild, {yPercent: 8}, {yPercent: -8, ease: 'none', scrollTrigger: {trigger: c, start: 'top bottom', end: 'bottom top', scrub: true}}));
