@@ -2,33 +2,589 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>Пульт «Вершина»</title>
 <meta name="apple-mobile-web-app-title" content="Пульт Вершина">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#283873">
 <link rel="icon" href="../assets/logo.png">
 <link rel="apple-touch-icon" href="icon.png">
+<title>Пульт сайта «Вершина»</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
-html,body{margin:0;height:100%;background:#f2f5fc;font-family:system-ui,sans-serif}
-iframe{position:fixed;inset:0;width:100%;height:100%;border:0}
-.load{position:fixed;inset:0;display:grid;place-items:center;text-align:center;color:#283873;font-weight:700;padding:24px}
-.load small{display:block;margin-top:14px;font-weight:600;color:#5b6588}
-.load a{color:#3557d8}
+:root{--navy:#283873;--deep:#1c2860;--blue:#3557d8;--bg:#f2f5fc;--card:#fff;--ink:#0f1a46;--muted:#5b6588;--line:#dfe5f4;--green:#1f9d55;--red:#d93848;--sky:#e6ecfb}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:var(--bg);color:var(--ink);font-family:Manrope,system-ui,sans-serif;font-size:17px;line-height:1.45}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none}
+.wrap{max-width:640px;margin:0 auto;padding:16px 16px 120px}
+h1,h2,.disp{font-family:Oswald,Impact,sans-serif;text-transform:uppercase;letter-spacing:.01em}
+.hidden{display:none!important}
+
+/* Шапка */
+.top{position:sticky;top:0;z-index:20;background:var(--navy);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 4px 18px -10px rgba(0,0,0,.4)}
+.top h1{font-size:22px;flex:1;line-height:1.1}
+.top .back{display:flex;align-items:center;gap:6px;height:44px;padding:0 14px 0 10px;border-radius:12px;background:rgba(255,255,255,.14);color:#fff;font-weight:800;font-size:16px}
+.demo{background:#fff4d6;color:#7a4b00;font-size:14px;font-weight:700;text-align:center;padding:8px 12px}
+
+/* Подсказка */
+.hint{display:flex;gap:12px;background:var(--sky);border-radius:16px;padding:14px 16px;margin:4px 0 18px;color:var(--navy);font-weight:600;font-size:16px}
+.hint b{font-size:22px;line-height:1}
+
+/* Плитки главного экрана */
+.hello{margin:8px 0 18px}
+.hello h2{font-size:30px;color:var(--navy)}
+.hello p{color:var(--muted);font-size:16px}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tile{background:var(--card);border-radius:22px;padding:18px 16px;text-align:left;box-shadow:0 10px 26px -18px rgba(20,35,100,.45);border:2px solid transparent;display:flex;flex-direction:column;gap:6px;min-height:150px;transition:transform .15s,border-color .15s}
+.tile:active{transform:scale(.97);border-color:var(--blue)}
+.tile .ic{font-size:38px;line-height:1}
+.tile b{font-family:Oswald,sans-serif;text-transform:uppercase;font-size:21px;color:var(--navy);line-height:1.1;margin-top:auto}
+.tile span{font-size:14px;color:var(--muted);font-weight:600}
+.tile.wide{grid-column:1/-1;flex-direction:row;align-items:center;min-height:0;gap:14px}
+.tile.wide b{margin:0}
+.links{display:grid;gap:10px;margin-top:18px}
+
+/* Кнопки */
+.btn{text-decoration:none;display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:58px;padding:0 18px;border-radius:16px;font-weight:800;font-size:18px;text-align:center}
+.btn-main{background:var(--green);color:#fff;box-shadow:0 10px 22px -12px rgba(31,157,85,.8)}
+.btn-blue{background:var(--navy);color:#fff}
+.btn-light{background:#fff;color:var(--navy);border:2px solid var(--line)}
+.btn-danger{background:#fff;color:var(--red);border:2px solid #f3c6cb}
+.btn:active{transform:scale(.98)}
+.btn[disabled]{opacity:.5}
+.sticky{position:fixed;left:0;right:0;bottom:0;z-index:15;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:linear-gradient(180deg,rgba(242,245,252,0),var(--bg) 30%)}
+.sticky .btn{max-width:608px;margin:0 auto}
+
+/* Карточки списка */
+.group-title{font-family:Oswald,sans-serif;text-transform:uppercase;color:var(--navy);font-size:20px;margin:22px 0 10px;display:flex;align-items:center;gap:10px}
+.group-title small{font-family:Manrope,sans-serif;text-transform:none;font-size:14px;color:var(--muted);font-weight:600}
+.item{background:var(--card);border-radius:20px;padding:14px;margin-bottom:12px;box-shadow:0 10px 26px -20px rgba(20,35,100,.5);display:flex;gap:14px}
+.item .thumb{flex:none;width:86px;height:86px;border-radius:14px;background:var(--sky) center/cover no-repeat}
+.item .body{flex:1;min-width:0}
+.item .t{font-weight:800;font-size:17px;line-height:1.25;color:var(--ink)}
+.item .s{font-size:14px;color:var(--muted);font-weight:600;margin-top:3px}
+.item .slots{margin-top:6px;display:grid;gap:4px}
+.item .slot{display:flex;justify-content:space-between;gap:8px;font-size:15px;background:var(--bg);border-radius:10px;padding:6px 10px}
+.item .slot b{font-family:Oswald,sans-serif;font-size:17px;color:var(--navy)}
+.tag{display:inline-block;font-size:12px;font-weight:800;padding:3px 9px;border-radius:999px;background:var(--sky);color:var(--navy);margin-right:4px}
+.tag.pro{background:var(--blue);color:#fff}
+.acts{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.act{height:44px;padding:0 14px;border-radius:12px;font-weight:800;font-size:15px;background:var(--sky);color:var(--navy);display:inline-flex;align-items:center;gap:6px}
+.act.del{background:#fdecee;color:var(--red)}
+.act.mv{width:44px;padding:0;justify-content:center;font-size:18px}
+.empty{text-align:center;color:var(--muted);padding:26px 10px;font-weight:600}
+
+/* Фото-сетки */
+.photos{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ph{background:var(--card);border-radius:20px;overflow:hidden;box-shadow:0 10px 26px -20px rgba(20,35,100,.5)}
+.ph .img{aspect-ratio:4/3;background:var(--sky) center/cover no-repeat}
+.ph .cap{padding:10px 12px 0;font-weight:800;font-size:15px;line-height:1.25}
+.ph .acts{padding:0 10px 12px}
+.ph .act{flex:1;justify-content:center;padding:0 8px}
+
+/* Окно-форма */
+.sheet{position:fixed;inset:0;z-index:50;background:rgba(15,26,70,.45);display:flex;align-items:flex-end;justify-content:center}
+.sheet .panel{background:var(--bg);width:100%;max-width:640px;max-height:94vh;overflow:auto;border-radius:24px 24px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom));animation:up .25s ease-out}
+@keyframes up{from{transform:translateY(40px);opacity:.4}}
+.sheet h2{font-size:26px;color:var(--navy);margin-bottom:14px}
+.field{margin-bottom:16px}
+.field label{display:block;font-weight:800;font-size:16px;margin-bottom:4px}
+.field .help{font-size:14px;color:var(--muted);font-weight:600;margin-bottom:8px}
+.field input[type=text],.field input[type=url],.field input[type=date],.field input[type=time],.field textarea,.field input[type=password],.field input[inputmode]{width:100%;min-height:56px;border-radius:14px;border:2px solid var(--line);background:#fff;padding:12px 14px;font-size:18px;outline:none}
+.field textarea{min-height:110px;resize:vertical}
+.field input:focus,.field textarea:focus{border-color:var(--blue)}
+.field.err input,.field.err textarea{border-color:var(--red)}
+.field .errmsg{display:none;color:var(--red);font-weight:700;font-size:14px;margin-top:6px}
+.field.err .errmsg{display:block}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{min-width:56px;height:52px;padding:0 14px;border-radius:14px;border:2px solid var(--line);background:#fff;font-weight:800;font-size:17px;color:var(--navy)}
+.chip.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.seg .chip{height:60px;font-size:20px;font-family:Oswald,sans-serif;text-transform:uppercase}
+.slotbox{background:#fff;border:2px solid var(--line);border-radius:18px;padding:14px;margin-bottom:12px}
+.slotbox .row{display:flex;align-items:center;gap:10px;margin-top:12px}
+.slotbox .row span{font-weight:800;color:var(--muted)}
+.slotbox .row input{flex:1;min-height:52px;border-radius:12px;border:2px solid var(--line);padding:8px 10px;font-size:18px;background:#fff;text-align:center}
+.slotbox .head{display:flex;justify-content:space-between;align-items:center;font-weight:800}
+.slotbox .x{color:var(--red);font-weight:800;font-size:15px;height:40px;padding:0 10px;border-radius:10px;background:#fdecee}
+.photo-pick{display:flex;gap:12px;align-items:center}
+.photo-pick .prev{flex:none;width:110px;height:110px;border-radius:16px;background:var(--sky) center/cover no-repeat;display:grid;place-items:center;color:var(--muted);font-size:13px;font-weight:700;text-align:center}
+.photo-pick .btn{min-height:56px;font-size:16px}
+.form-acts{display:grid;gap:10px;margin-top:22px}
+
+/* Переключатель */
+.switch{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#fff;border:2px solid var(--line);border-radius:18px;padding:14px 16px;margin-bottom:16px;width:100%;text-align:left}
+.switch b{font-size:18px}
+.switch .s{display:block;font-size:14px;color:var(--muted);font-weight:600}
+.tog{flex:none;width:64px;height:36px;border-radius:999px;background:#c8cfe3;position:relative;transition:background .2s}
+.tog::after{content:"";position:absolute;top:4px;left:4px;width:28px;height:28px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+.switch.on .tog{background:var(--green)}
+.switch.on .tog::after{transform:translateX(28px)}
+.preview{background:linear-gradient(180deg,#fff,#dde5f8);border-radius:18px;padding:20px 14px;text-align:center;margin-bottom:16px}
+.preview .lbl{font-size:13px;color:var(--muted);font-weight:700;margin-bottom:10px}
+.pill{display:inline-flex;align-items:center;gap:8px;background:#fff;border-radius:999px;padding:9px 16px;font-weight:800;font-size:15px;color:var(--navy);box-shadow:0 8px 20px -12px rgba(20,35,100,.6)}
+.pill i{width:10px;height:10px;border-radius:50%;background:#e5484d}
+
+/* Вход */
+.login{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:24px 20px;max-width:440px;margin:0 auto;text-align:center}
+.login .logo{font-family:Oswald,sans-serif;font-size:44px;color:var(--navy);text-transform:uppercase;line-height:1}
+.login .logo small{display:block;font-size:16px;letter-spacing:.2em;color:var(--blue);margin-top:6px}
+.login p{color:var(--muted);margin:18px 0}
+.pin{display:flex;justify-content:center;gap:10px;margin:8px 0 18px}
+.pin span{width:52px;height:62px;border-radius:14px;background:#fff;border:2px solid var(--line);display:grid;place-items:center;font-size:30px;font-weight:800;color:var(--navy)}
+.pin span.f{border-color:var(--navy)}
+.keys{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%;max-width:320px;margin:0 auto}
+.keys button{height:66px;border-radius:18px;background:#fff;font-size:28px;font-weight:800;color:var(--navy);box-shadow:0 6px 16px -12px rgba(20,35,100,.6)}
+.keys button:active{background:var(--sky)}
+.keys .k-del{font-size:20px}
+
+/* Сообщения */
+.toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:80;max-width:calc(100% - 32px);width:max-content;padding:16px 20px;border-radius:16px;font-weight:800;font-size:16px;color:#fff;background:var(--green);box-shadow:0 14px 30px -14px rgba(0,0,0,.5);text-align:center}
+.toast.bad{background:var(--red)}
+.busy{position:fixed;inset:0;z-index:90;background:rgba(242,245,252,.75);display:grid;place-items:center}
+.busy div{background:#fff;border-radius:20px;padding:22px 26px;font-weight:800;color:var(--navy);display:flex;align-items:center;gap:14px;box-shadow:0 14px 30px -14px rgba(0,0,0,.35)}
+.spin{width:28px;height:28px;border-radius:50%;border:4px solid var(--sky);border-top-color:var(--navy);animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.steps{display:grid;gap:12px;counter-reset:s}
+.steps li{list-style:none;background:#fff;border-radius:16px;padding:14px 14px 14px 58px;position:relative;font-weight:600}
+.steps li::before{counter-increment:s;content:counter(s);position:absolute;left:14px;top:12px;width:32px;height:32px;border-radius:50%;background:var(--navy);color:#fff;display:grid;place-items:center;font-weight:800}
 </style>
 </head>
 <body>
-<div class="load" id="load"><div>Открываю пульт…<small>Если долго не открывается — <a id="direct" target="_top">нажмите сюда</a></small></div></div>
-<iframe id="app" title="Пульт сайта «Вершина»" allow="clipboard-write"></iframe>
+
+<div id="demoBar" class="demo hidden">Демо-режим: изменения сохраняются только в этом браузере и на сайт не попадают</div>
+
+<!-- ВХОД -->
+<section id="login" class="login hidden">
+  <div class="logo">Вершина<small>Пульт сайта</small></div>
+  <p>Введите PIN-код, чтобы войти.<br>Его нужно ввести только один раз на этом телефоне.</p>
+  <div class="pin" id="pinDots"><span></span><span></span><span></span><span></span></div>
+  <div class="keys" id="keys"></div>
+</section>
+
+<!-- ГЛАВНЫЙ ЭКРАН -->
+<section id="home" class="hidden">
+  <div class="top"><h1>Пульт сайта «Вершина»</h1></div>
+  <div class="wrap">
+    <div class="hello"><h2>Что меняем?</h2><p>Нажмите на нужный раздел.</p></div>
+    <div class="tiles" id="tiles"></div>
+    <div class="links">
+      <a class="btn btn-blue" id="openSite" target="_blank" rel="noopener">🌐 Открыть сайт</a>
+      <button class="btn btn-light" data-go="help">❓ Как пользоваться пультом</button>
+      <button class="btn btn-light" id="logout" style="min-height:48px;font-size:15px">Выйти на этом телефоне</button>
+    </div>
+  </div>
+</section>
+
+<!-- ЭКРАН РАЗДЕЛА -->
+<section id="screen" class="hidden">
+  <div class="top"><button class="back" data-go="home">← Назад</button><h1 id="scrTitle"></h1></div>
+  <div class="wrap" id="scrBody"></div>
+  <div class="sticky hidden" id="scrAddWrap"><button class="btn btn-main" id="scrAdd"></button></div>
+</section>
+
+<div id="sheet" class="sheet hidden"><div class="panel" id="sheetPanel"></div></div>
+<div id="busy" class="busy hidden"><div><span class="spin"></span><span id="busyText">Сохраняю…</span></div></div>
+<input type="file" id="filePick" accept="image/*" class="hidden">
+
+<script>window.PULT_API = 'https://script.google.com/macros/s/AKfycbwCPWElhR2SyivgctH5khOF90mNTRNXftdIjBGHzx4FW9Rnp4NE-u6UHbj3AtfvxBl5/exec';</script>
 <script>
-// Ссылка на «Пульт сайта» (Google Apps Script). Меняется только здесь.
-const PULT = 'https://script.google.com/macros/s/AKfycbwCPWElhR2SyivgctH5khOF90mNTRNXftdIjBGHzx4FW9Rnp4NE-u6UHbj3AtfvxBl5/exec';
-document.getElementById('direct').href = PULT;
-const f = document.getElementById('app');
-f.onload = () => setTimeout(() => document.getElementById('load').remove(), 300);
-f.src = PULT;
+/* ================== СВЯЗЬ С СЕРВЕРОМ ================== */
+// На сайте пульт общается с Google напрямую (без входа в аккаунт — так не мешают чужие аккаунты в браузере)
+const API_URL = window.PULT_API || '';
+const LIVE = !!API_URL || !!(window.google && google.script && google.script.run);
+function call(fn, ...args) {
+  if (API_URL) {
+    return fetch(API_URL, {method: 'POST', credentials: 'omit', headers: {'Content-Type': 'text/plain;charset=utf-8'}, body: JSON.stringify({fn, args})})
+      .then(r => r.json())
+      .then(d => { if (!d.ok) throw new Error(d.error); return d.result; });
+  }
+  if (!LIVE) return Demo[fn](...args);
+  return new Promise((ok, fail) => google.script.run.withSuccessHandler(ok).withFailureHandler(fail)[fn](...args));
+}
+
+/* Демо-режим: для проверки пульта без Google. Данные — в памяти браузера. */
+const Demo = (() => {
+  const PIN = '2580';
+  const seed = {
+    announce: {show: false, text: '', link: ''},
+    schedule: [
+      {dir: 'ММА', name: 'Младшая группа', age: '5–7 лет', lvl: 'Любители', slots: [['Вт, Чт', '16:00–17:00'], ['Сб', '11:00–12:00']]},
+      {dir: 'ММА', name: 'Средняя группа', age: '8–13 лет', lvl: 'Проф', slots: [['Пн, Ср, Пт', '17:30–19:00'], ['Вт, Чт', '18:30–20:00']]},
+      {dir: 'Бокс', name: 'Бокс', age: '14+', lvl: 'Все', slots: [['Вт, Чт', '19:00–20:30'], ['Сб', '18:00–19:30']]}
+    ],
+    extras: [{title: 'Суббота — ОФП', text: '11:00 и 12:00'}],
+    news: [{date: '26 августа 2026', title: 'Открыт набор в действующие и новые группы', photo: 'assets/img/news-nabor.jpg', link: ''}],
+    achievements: [{date: 'Сен 2026', name: 'Открытый турнир по боксу памяти Г.Ф. Кучеренко', details: 'Бокс · Мазальков Тимур', result: '2 место', photo: 'assets/img/ach-box.jpg', link: ''}],
+    gallery: [{photo: 'assets/img/g1.jpg', caption: 'Тренер поднимает руку победителя'}, {photo: 'assets/img/g2.jpg', caption: 'Борьба в партере'}],
+    photos: {team: 'assets/img/team.jpg', mma: 'assets/img/mma.jpg', box: 'assets/img/box.jpg', denis: 'assets/img/coach-denis.webp', anton: 'assets/img/coach-anton.jpg'}
+  };
+  let db; try { db = JSON.parse(localStorage.getItem('pult-demo')); } catch (e) {}
+  if (!db) db = JSON.parse(JSON.stringify(seed));
+  const keys = [['team', 'Фото команды (раздел «О клубе»)'], ['mma', 'Карточка «ММА»'], ['box', 'Карточка «Бокс»'], ['denis', 'Тренер Денис'], ['anton', 'Тренер Антон']];
+  const out = () => {
+    try { localStorage.setItem('pult-demo', JSON.stringify(db)); } catch (e) {}
+    const d = JSON.parse(JSON.stringify(db));
+    ['schedule', 'extras', 'news', 'achievements', 'gallery'].forEach(k => d[k].forEach((x, i) => x._row = i + 2));
+    return Object.assign(d, {photoKeys: keys, siteUrl: '../'});
+  };
+  const wait = v => new Promise(r => setTimeout(() => r(v), 350));
+  const chk = p => { if (String(p) !== PIN) throw new Error('Неверный PIN-код'); };
+  const top = {news: 1, achievements: 1};
+  return {
+    getData: p => { try { chk(p); } catch (e) { return Promise.reject(e); } return wait(out()); },
+    saveItem: (p, t, row, o) => { chk(p); if (row) db[t][row - 2] = o; else top[t] ? db[t].unshift(o) : db[t].push(o); return wait(out()); },
+    deleteItem: (p, t, row) => { chk(p); db[t].splice(row - 2, 1); return wait(out()); },
+    moveItem: (p, t, row, d) => { chk(p); const a = db[t], i = row - 2, j = i + d; if (j >= 0 && j < a.length) [a[i], a[j]] = [a[j], a[i]]; return wait(out()); },
+    saveAnnounce: (p, o) => { chk(p); db.announce = o; return wait(out()); },
+    setPhoto: (p, k, u) => { chk(p); db.photos[k] = u; return wait(out()); },
+    uploadPhoto: (p, b64) => { chk(p); return wait('data:image/jpeg;base64,' + b64); }
+  };
+})();
+
+/* ================== СОСТОЯНИЕ ================== */
+let PIN = '', D = null, CUR = 'home';
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
+const view = u => !u ? '' : (/^(https?:|data:)/.test(u) ? u : (D && D.siteUrl ? D.siteUrl : '') + u);
+const bg = u => u ? `style="background-image:url('${esc(view(u))}')"` : '';
+const store = {get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } }, set: (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {} }};
+
+function show(id) { ['login', 'home', 'screen'].forEach(x => $('#' + x).classList.toggle('hidden', x !== id)); window.scrollTo(0, 0); }
+function toast(msg, bad) {
+  const t = document.createElement('div'); t.className = 'toast' + (bad ? ' bad' : ''); t.textContent = msg;
+  document.body.append(t); setTimeout(() => t.remove(), bad ? 4500 : 2800);
+}
+function busy(on, text) { $('#busyText').textContent = text || 'Сохраняю…'; $('#busy').classList.toggle('hidden', !on); }
+async function run(fn, args, okMsg, text) {
+  busy(true, text);
+  try { const d = await call(fn, PIN, ...args); D = d; busy(false); if (okMsg) toast(okMsg); return d; }
+  catch (e) {
+    busy(false);
+    const m = String(e && e.message || e);
+    toast(/PIN/.test(m) ? 'Неверный PIN-код. Войдите заново.' : 'Не получилось. Проверьте интернет и попробуйте ещё раз.', true);
+    if (/PIN/.test(m)) logout();
+    throw e;
+  }
+}
+const SAVED = '✅ Сохранено! Сайт обновится в течение минуты';
+
+/* ================== ВХОД ================== */
+let pinBuf = '';
+function drawPin() { [...$('#pinDots').children].forEach((s, i) => { s.textContent = pinBuf[i] ? '•' : ''; s.classList.toggle('f', !!pinBuf[i]); }); }
+$('#keys').innerHTML = [1, 2, 3, 4, 5, 6, 7, 8, 9, '', 0, '⌫'].map(k => k === '' ? '<span></span>' : `<button data-k="${k}" class="${k === '⌫' ? 'k-del' : ''}">${k}</button>`).join('');
+$('#keys').addEventListener('click', async e => {
+  const b = e.target.closest('button'); if (!b) return;
+  const k = b.dataset.k;
+  if (k === '⌫') pinBuf = pinBuf.slice(0, -1); else if (pinBuf.length < 4) pinBuf += k;
+  drawPin();
+  if (pinBuf.length === 4) {
+    try { await enter(pinBuf); }
+    catch (err) { pinBuf = ''; drawPin(); toast('Неверный PIN-код. Попробуйте ещё раз.', true); }
+  }
+});
+async function enter(pin) {
+  busy(true, 'Вхожу…');
+  try { D = await call('getData', pin); } finally { busy(false); }
+  PIN = pin; store.set('pult-pin', pin); renderHome(); show('home');
+}
+function logout() { store.set('pult-pin', null); PIN = ''; pinBuf = ''; drawPin(); show('login'); }
+$('#logout').onclick = () => { if (confirm('Выйти из пульта на этом телефоне?')) logout(); };
+
+/* ================== ГЛАВНЫЙ ЭКРАН ================== */
+const SECTIONS = {
+  announce:     {ic: '📣', title: 'Объявление', sub: d => d.announce.show ? '🟢 Сейчас показано' : '⚪ Сейчас выключено'},
+  schedule:     {ic: '📅', title: 'Расписание', sub: d => d.schedule.length + ' ' + plural(d.schedule.length, 'группа', 'группы', 'групп')},
+  news:         {ic: '📰', title: 'Новости', sub: d => d.news.length + ' ' + plural(d.news.length, 'новость', 'новости', 'новостей')},
+  achievements: {ic: '🏆', title: 'Достижения', sub: d => d.achievements.length + ' ' + plural(d.achievements.length, 'турнир', 'турнира', 'турниров')},
+  gallery:      {ic: '🖼️', title: 'Галерея', sub: d => d.gallery.length + ' из 7 фото'},
+  photos:       {ic: '📷', title: 'Фото на сайте', sub: () => 'Команда, ММА, бокс, тренеры'}
+};
+function plural(n, a, b, c) { n = Math.abs(n) % 100; const m = n % 10; if (n > 10 && n < 20) return c; if (m > 1 && m < 5) return b; if (m === 1) return a; return c; }
+function renderHome() {
+  $('#tiles').innerHTML = Object.entries(SECTIONS).map(([k, s]) =>
+    `<button class="tile" data-go="${k}"><span class="ic">${s.ic}</span><b>${s.title}</b><span>${esc(s.sub(D))}</span></button>`).join('');
+  $('#openSite').href = D.siteUrl || '#';
+}
+document.addEventListener('click', e => {
+  const g = e.target.closest('[data-go]'); if (!g) return;
+  const to = g.dataset.go;
+  if (to === 'home') { renderHome(); show('home'); CUR = 'home'; } else if (to === 'help') openHelp(); else openSection(to);
+});
+
+/* ================== РАЗДЕЛЫ ================== */
+function openSection(k) {
+  CUR = k; $('#scrTitle').textContent = SECTIONS[k].title;
+  ({announce: drawAnnounce, schedule: drawSchedule, news: drawNews, achievements: drawAch, gallery: drawGallery, photos: drawPhotos})[k]();
+  show('screen');
+}
+function redraw() { if (CUR !== 'home') openSectionKeepScroll(CUR); }
+function openSectionKeepScroll(k) { const y = window.scrollY; openSection(k); window.scrollTo(0, y); }
+function addBtn(text, fn) { $('#scrAddWrap').classList.toggle('hidden', !text); if (text) { $('#scrAdd').textContent = text; $('#scrAdd').onclick = fn; } }
+const hint = (ic, text) => `<div class="hint"><b>${ic}</b><div>${text}</div></div>`;
+const moveBtns = (t, row, i, n) => n > 1 ? `<button class="act mv" ${i === 0 ? 'disabled style="opacity:.35"' : ''} onclick="mv('${t}',${row},-1)" aria-label="Выше">↑</button><button class="act mv" ${i === n - 1 ? 'disabled style="opacity:.35"' : ''} onclick="mv('${t}',${row},1)" aria-label="Ниже">↓</button>` : '';
+async function mv(t, row, d) { await run('moveItem', [t, row, d], null, 'Перемещаю…'); redraw(); }
+async function del(t, row, what) {
+  if (!confirm(`Удалить ${what}?\n\nЭто действие нельзя отменить.`)) return;
+  await run('deleteItem', [t, row], '🗑 Удалено'); redraw();
+}
+
+/* ---------- Объявление ---------- */
+function drawAnnounce() {
+  addBtn(null);
+  const a = D.announce;
+  $('#scrBody').innerHTML = hint('💡', 'Короткая плашка вверху сайта. Например: «12 октября — открытый турнир. Приходите болеть!» Когда событие прошло — просто выключите.') +
+    `<button class="switch ${a.show ? 'on' : ''}" id="anSw" type="button"><span><b>Показывать на сайте</b><span class="s" id="anSwS">${a.show ? 'Сейчас посетители видят объявление' : 'Сейчас объявление скрыто'}</span></span><span class="tog"></span></button>
+    <div class="field" id="fText"><label>Текст объявления</label><div class="help">Коротко, в одну-две строки</div><textarea id="anText" maxlength="140" placeholder="Например: 12 октября — открытый турнир. Приходите болеть!">${esc(a.text)}</textarea><div class="errmsg">Напишите текст объявления</div></div>
+    <div class="preview"><div class="lbl">Так это будет выглядеть на сайте:</div><span class="pill"><i></i><span id="anPrev">${esc(a.text) || 'Текст объявления'}</span></span></div>
+    <div class="field"><label>Ссылка (необязательно)</label><div class="help">Если есть пост в Instagram про это событие — вставьте ссылку. Если нет — оставьте пустым.</div><input type="url" id="anLink" value="${esc(a.link)}" placeholder="https://instagram.com/…"></div>
+    <button class="btn btn-main" id="anSave">✅ Сохранить</button>`;
+  let on = a.show;
+  $('#anSw').onclick = () => { on = !on; $('#anSw').classList.toggle('on', on); $('#anSwS').textContent = on ? 'Посетители увидят объявление после сохранения' : 'Объявление будет скрыто после сохранения'; };
+  $('#anText').oninput = e => { $('#anPrev').textContent = e.target.value || 'Текст объявления'; $('#fText').classList.remove('err'); };
+  $('#anSave').onclick = async () => {
+    const text = $('#anText').value.trim();
+    if (on && !text) { $('#fText').classList.add('err'); return; }
+    await run('saveAnnounce', [{show: on, text, link: $('#anLink').value.trim()}], on ? '✅ Объявление включено! Появится на сайте в течение минуты' : '✅ Объявление выключено');
+    drawAnnounce();
+  };
+}
+
+/* ---------- Расписание ---------- */
+const DAYS = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+function drawSchedule() {
+  addBtn('＋ Добавить группу', () => editGroup());
+  const card = g => `<div class="item"><div class="body">
+      <div class="t">${esc(g.name)} <span class="tag">${esc(g.age)}</span>${g.lvl ? `<span class="tag ${/проф/i.test(g.lvl) ? 'pro' : ''}">${esc(g.lvl)}</span>` : ''}</div>
+      <div class="slots">${g.slots.map(s => `<div class="slot"><span>${esc(s[0])}</span><b>${esc(s[1])}</b></div>`).join('')}</div>
+      <div class="acts"><button class="act" onclick="editGroup(${g._row})">✏️ Изменить</button><button class="act del" onclick="del('schedule',${g._row},'группу «${esc(g.name).replace(/'/g, '')}»')">🗑 Удалить</button></div>
+    </div></div>`;
+  const mma = D.schedule.filter(g => !/бокс/i.test(g.dir)), box = D.schedule.filter(g => /бокс/i.test(g.dir));
+  $('#scrBody').innerHTML = hint('💡', 'Чтобы поменять время или дни — нажмите «Изменить» у нужной группы. Новая группа — зелёная кнопка внизу.') +
+    `<div class="group-title">🥋 ММА <small>${mma.length} ${plural(mma.length, 'группа', 'группы', 'групп')}</small></div>${mma.map(card).join('') || '<div class="empty">Пока нет групп</div>'}
+     <div class="group-title">🥊 Бокс <small>${box.length} ${plural(box.length, 'группа', 'группы', 'групп')}</small></div>${box.map(card).join('') || '<div class="empty">Пока нет групп</div>'}
+     <div class="group-title">➕ Доп. занятия <small>ОФП, спарринги…</small></div>
+     ${D.extras.map(x => `<div class="item"><div class="body"><div class="t">${esc(x.title)}</div><div class="s">${esc(x.text)}</div>
+       <div class="acts"><button class="act" onclick="editExtra(${x._row})">✏️ Изменить</button><button class="act del" onclick="del('extras',${x._row},'«${esc(x.title).replace(/'/g, '')}»')">🗑 Удалить</button></div></div></div>`).join('')}
+     <button class="btn btn-light" onclick="editExtra()">＋ Добавить доп. занятие</button>`;
+}
+function parseSlot(s) {
+  const days = DAYS.filter(d => new RegExp(d, 'i').test(s[0] || ''));
+  const t = String(s[1] || '').split(/\s*[–—-]\s*/);
+  const pad = x => /^\d:\d\d$/.test(x) ? '0' + x : x;
+  return {days, from: pad(t[0] || ''), to: pad(t[1] || '')};
+}
+function fmtTime(t) { return t ? t.replace(/^0(\d)/, '$1') : ''; }
+function editGroup(row) {
+  const g = row ? D.schedule.find(x => x._row === row) : {dir: 'ММА', name: '', age: '', lvl: 'Любители', slots: [['', '']]};
+  let dir = /бокс/i.test(g.dir) ? 'Бокс' : 'ММА', lvl = g.lvl || 'Все';
+  let slots = (g.slots.length ? g.slots : [['', '']]).map(parseSlot);
+  const panel = () => `
+    <h2>${row ? 'Изменить группу' : 'Новая группа'}</h2>
+    <div class="field"><label>Направление</label><div class="seg">${['ММА', 'Бокс'].map(x => `<button type="button" class="chip ${dir === x ? 'on' : ''}" data-dir="${x}">${x === 'ММА' ? '🥋' : '🥊'} ${x}</button>`).join('')}</div></div>
+    <div class="field" id="fName"><label>Название группы</label><div class="help">Например: Младшая группа</div><input type="text" id="gName" value="${esc(g.name)}" placeholder="Младшая группа"><div class="errmsg">Напишите название группы</div></div>
+    <div class="field"><label>Возраст</label><div class="help">Например: 5–7 лет или 14+</div><input type="text" id="gAge" value="${esc(g.age)}" placeholder="5–7 лет"></div>
+    <div class="field"><label>Уровень</label><div class="chips">${['Любители', 'Проф', 'Все', 'Дети'].map(x => `<button type="button" class="chip ${lvl === x ? 'on' : ''}" data-lvl="${x}">${x}</button>`).join('')}</div></div>
+    <div class="field" id="fSlots"><label>Дни и время</label><div class="help">Отметьте дни нажатием и выберите время. Если в разные дни разное время — добавьте ещё строку.</div>
+      ${slots.map((s, i) => `<div class="slotbox" data-i="${i}"><div class="head"><span>Время ${slots.length > 1 ? i + 1 : ''}</span>${slots.length > 1 ? `<button type="button" class="x" data-rm="${i}">✕ Убрать</button>` : ''}</div>
+        <div class="chips" style="margin-top:10px">${DAYS.map(d => `<button type="button" class="chip ${s.days.includes(d) ? 'on' : ''}" data-day="${d}">${d}</button>`).join('')}</div>
+        <div class="row"><span>с</span><input type="time" data-from value="${esc(s.from)}"><span>до</span><input type="time" data-to value="${esc(s.to)}"></div></div>`).join('')}
+      ${slots.length < 3 ? '<button type="button" class="btn btn-light" id="addSlot">＋ Добавить ещё время</button>' : ''}
+      <div class="errmsg">Отметьте хотя бы один день и укажите время</div></div>
+    <div class="form-acts"><button class="btn btn-main" id="gSave">✅ Сохранить</button><button class="btn btn-light" id="cancel">Отмена</button></div>`;
+  const keep = () => { // запоминаем введённое перед перерисовкой
+    g.name = $('#gName').value; g.age = $('#gAge').value;
+    slots = [...document.querySelectorAll('.slotbox')].map(b => ({days: [...b.querySelectorAll('.chip.on')].map(c => c.dataset.day), from: b.querySelector('[data-from]').value, to: b.querySelector('[data-to]').value}));
+  };
+  const draw = () => {
+    openSheet(panel());
+    $('#sheetPanel').onclick = e => {
+      const b = e.target.closest('button'); if (!b) return;
+      if (b.dataset.dir) { keep(); dir = b.dataset.dir; draw(); }
+      else if (b.dataset.lvl) { keep(); lvl = b.dataset.lvl; draw(); }
+      else if (b.dataset.day) { b.classList.toggle('on'); $('#fSlots').classList.remove('err'); }
+      else if (b.dataset.rm) { keep(); slots.splice(+b.dataset.rm, 1); draw(); }
+      else if (b.id === 'addSlot') { keep(); slots.push({days: [], from: '', to: ''}); draw(); }
+      else if (b.id === 'cancel') closeSheet();
+      else if (b.id === 'gSave') save();
+    };
+  };
+  const save = async () => {
+    keep();
+    let ok = true;
+    if (!g.name.trim()) { $('#fName').classList.add('err'); ok = false; }
+    const filled = slots.filter(s => s.days.length || s.from || s.to);
+    if (!filled.length || filled.some(s => !s.days.length || !s.from || !s.to)) { $('#fSlots').classList.add('err'); ok = false; }
+    if (!ok) { document.querySelector('.field.err').scrollIntoView({behavior: 'smooth', block: 'center'}); return; }
+    const obj = {dir, name: g.name.trim(), age: g.age.trim(), lvl,
+      slots: filled.map(s => [DAYS.filter(d => s.days.includes(d)).join(', '), fmtTime(s.from) + '–' + fmtTime(s.to)])};
+    await run('saveItem', ['schedule', row || null, obj], SAVED); closeSheet(); redraw();
+  };
+  draw();
+}
+function editExtra(row) {
+  const x = row ? D.extras.find(e => e._row === row) : {title: '', text: ''};
+  openSheet(`<h2>${row ? 'Изменить занятие' : 'Новое доп. занятие'}</h2>
+    <div class="field" id="fT"><label>Название</label><div class="help">Например: Пятница — спарринги</div><input type="text" id="xT" value="${esc(x.title)}" placeholder="Пятница — спарринги"><div class="errmsg">Напишите название</div></div>
+    <div class="field"><label>Когда / подробности</label><div class="help">Например: 16:00, 17:30 и 19:00 · все группы</div><input type="text" id="xD" value="${esc(x.text)}" placeholder="16:00, 17:30 и 19:00"></div>
+    <div class="form-acts"><button class="btn btn-main" id="xSave">✅ Сохранить</button><button class="btn btn-light" onclick="closeSheet()">Отмена</button></div>`);
+  $('#xSave').onclick = async () => {
+    const title = $('#xT').value.trim(); if (!title) return $('#fT').classList.add('err');
+    await run('saveItem', ['extras', row || null, {title, text: $('#xD').value.trim()}], SAVED); closeSheet(); redraw();
+  };
+}
+
+/* ---------- Новости ---------- */
+const MONTHS = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
+const fmtDate = iso => { const [y, m, d] = iso.split('-').map(Number); return `${d} ${MONTHS[m - 1]} ${y}`; };
+const parseDate = s => { const m = String(s).match(/(\d{1,2})\s+([а-я]+)\s+(\d{4})/i); if (!m) return ''; const mi = MONTHS.indexOf(m[2].toLowerCase()); return mi < 0 ? '' : `${m[3]}-${String(mi + 1).padStart(2, '0')}-${m[1].padStart(2, '0')}`; };
+const todayIso = () => { const t = new Date(); return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`; };
+function drawNews() {
+  addBtn('＋ Добавить новость', () => editNews());
+  $('#scrBody').innerHTML = hint('💡', 'На сайте видны все новости из списка, первая — самая свежая. Новая новость сама встаёт наверх. Стрелками ↑↓ можно поменять порядок.') +
+    (D.news.map((n, i) => `<div class="item"><div class="thumb" ${bg(n.photo)}></div><div class="body"><div class="s">${esc(n.date)}</div><div class="t">${esc(n.title)}</div>
+      <div class="acts"><button class="act" onclick="editNews(${n._row})">✏️ Изменить</button><button class="act del" onclick="del('news',${n._row},'эту новость')">🗑</button>${moveBtns('news', n._row, i, D.news.length)}</div></div></div>`).join('') || '<div class="empty">Новостей пока нет</div>');
+}
+function editNews(row) {
+  const n = row ? D.news.find(x => x._row === row) : {date: '', title: '', photo: '', link: ''};
+  openSheet(`<h2>${row ? 'Изменить новость' : 'Новая новость'}</h2>
+    <div class="field"><label>Дата</label><input type="date" id="nD" value="${esc(parseDate(n.date) || todayIso())}"></div>
+    <div class="field" id="fNT"><label>Заголовок</label><div class="help">Одно-два предложения о главном</div><textarea id="nT" maxlength="160" placeholder="Например: Открыт набор в новые группы">${esc(n.title)}</textarea><div class="errmsg">Напишите заголовок</div></div>
+    ${photoField('nP', n.photo)}
+    <div class="field"><label>Ссылка (необязательно)</label><div class="help">Пост в Instagram, где подробнее. Можно оставить пустым.</div><input type="url" id="nL" value="${esc(n.link)}" placeholder="https://instagram.com/…"></div>
+    <div class="form-acts"><button class="btn btn-main" id="nSave">✅ Сохранить</button><button class="btn btn-light" onclick="closeSheet()">Отмена</button></div>`);
+  bindPhoto('nP');
+  $('#nSave').onclick = async () => {
+    const title = $('#nT').value.trim(); if (!title) return $('#fNT').classList.add('err');
+    const date = $('#nD').value ? fmtDate($('#nD').value) : n.date;
+    await run('saveItem', ['news', row || null, {date, title, photo: photoVal('nP'), link: $('#nL').value.trim()}], SAVED); closeSheet(); redraw();
+  };
+}
+
+/* ---------- Достижения ---------- */
+function drawAch() {
+  addBtn('＋ Добавить достижение', () => editAch());
+  $('#scrBody').innerHTML = hint('🏆', 'Турниры и медали. Новое достижение само встаёт наверх списка.') +
+    (D.achievements.map((a, i) => `<div class="item"><div class="thumb" ${bg(a.photo)}></div><div class="body"><div class="s">${esc(a.date)} · <b style="color:var(--navy)">${esc(a.result)}</b></div><div class="t">${esc(a.name)}</div>
+      <div class="acts"><button class="act" onclick="editAch(${a._row})">✏️ Изменить</button><button class="act del" onclick="del('achievements',${a._row},'это достижение')">🗑</button>${moveBtns('achievements', a._row, i, D.achievements.length)}</div></div></div>`).join('') || '<div class="empty">Пока пусто</div>');
+}
+function editAch(row) {
+  const a = row ? D.achievements.find(x => x._row === row) : {date: '', name: '', details: '', result: '', photo: '', link: ''};
+  const now = new Date(), short = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'][now.getMonth()] + ' ' + now.getFullYear();
+  openSheet(`<h2>${row ? 'Изменить достижение' : 'Новое достижение'}</h2>
+    <div class="field"><label>Когда</label><div class="help">Например: Окт 2026</div><input type="text" id="aD" value="${esc(a.date || short)}"></div>
+    <div class="field" id="fAN"><label>Название турнира</label><input type="text" id="aN" value="${esc(a.name)}" placeholder="Открытый турнир по боксу"><div class="errmsg">Напишите название турнира</div></div>
+    <div class="field"><label>Подробности</label><div class="help">Город, вид спорта, имена бойцов</div><input type="text" id="aX" value="${esc(a.details)}" placeholder="Краснодар · Бокс · Иванов Иван"></div>
+    <div class="field" id="fAR"><label>Результат</label><div class="chips" style="margin-bottom:10px">${['1 место', '2 место', '3 место'].map(x => `<button type="button" class="chip" data-res="${x}">${x === '1 место' ? '🥇' : x === '2 место' ? '🥈' : '🥉'} ${x}</button>`).join('')}</div><input type="text" id="aR" value="${esc(a.result)}" placeholder="Или напишите своё: 2 из 3 поясов"><div class="errmsg">Укажите результат</div></div>
+    ${photoField('aP', a.photo)}
+    <div class="field"><label>Ссылка (необязательно)</label><input type="url" id="aL" value="${esc(a.link)}" placeholder="https://instagram.com/…"></div>
+    <div class="form-acts"><button class="btn btn-main" id="aSave">✅ Сохранить</button><button class="btn btn-light" onclick="closeSheet()">Отмена</button></div>`);
+  bindPhoto('aP');
+  document.querySelectorAll('[data-res]').forEach(b => b.onclick = () => { $('#aR').value = b.dataset.res; $('#fAR').classList.remove('err'); });
+  $('#aSave').onclick = async () => {
+    const name = $('#aN').value.trim(), result = $('#aR').value.trim();
+    if (!name) $('#fAN').classList.add('err'); if (!result) $('#fAR').classList.add('err'); if (!name || !result) return;
+    await run('saveItem', ['achievements', row || null, {date: $('#aD').value.trim(), name, details: $('#aX').value.trim(), result, photo: photoVal('aP'), link: $('#aL').value.trim()}], SAVED);
+    closeSheet(); redraw();
+  };
+}
+
+/* ---------- Галерея ---------- */
+function drawGallery() {
+  const full = D.gallery.length >= 7;
+  addBtn(full ? null : '＋ Добавить фото', () => pickPhoto(async url => { await run('saveItem', ['gallery', null, {photo: url, caption: ''}], '✅ Фото добавлено!'); redraw(); }));
+  $('#scrBody').innerHTML = hint('🖼️', 'На сайте показываются 7 фото в этом порядке. Чтобы поменять фото — нажмите «Заменить» и выберите новое с телефона.' + (full ? '<br><b style="font-size:15px">Сейчас уже 7 фото. Чтобы добавить новое — замените или удалите одно из старых.</b>' : '')) +
+    `<div class="photos">${D.gallery.map((g, i) => `<div class="ph"><div class="img" ${bg(g.photo)}></div><div class="acts" style="padding-top:10px">
+      <button class="act" onclick="replaceGallery(${g._row})">📷 Заменить</button></div>
+      <div class="acts">${moveBtns('gallery', g._row, i, D.gallery.length)}<button class="act del" style="flex:none;width:44px" onclick="del('gallery',${g._row},'это фото')">🗑</button></div></div>`).join('')}</div>`;
+}
+function replaceGallery(row) {
+  const g = D.gallery.find(x => x._row === row);
+  pickPhoto(async url => { await run('saveItem', ['gallery', row, {photo: url, caption: g.caption}], '✅ Фото заменено!'); redraw(); });
+}
+
+/* ---------- Фото разделов ---------- */
+function drawPhotos() {
+  addBtn(null);
+  $('#scrBody').innerHTML = hint('📷', 'Главные фото на сайте. Нажмите «Заменить фото» и выберите снимок с телефона — он сразу встанет на место старого.') +
+    `<div class="photos">${D.photoKeys.map(([k, label]) => `<div class="ph"><div class="img" ${bg(D.photos[k])}></div><div class="cap">${esc(label)}</div>
+      <div class="acts" style="padding-top:10px"><button class="act" onclick="replaceSection('${k}')">📷 Заменить</button></div></div>`).join('')}</div>`;
+}
+function replaceSection(k) { pickPhoto(async url => { await run('setPhoto', [k, url], '✅ Фото заменено! На сайте обновится в течение минуты'); redraw(); }); }
+
+/* ================== ФОТО С ТЕЛЕФОНА ================== */
+function photoField(id, val) {
+  return `<div class="field"><label>Фото</label><div class="help">Необязательно, но с фото новость смотрится лучше</div>
+    <div class="photo-pick"><div class="prev" id="${id}Prev" ${bg(val)}>${val ? '' : 'Нет фото'}</div>
+    <div style="flex:1;display:grid;gap:8px"><button type="button" class="btn btn-blue" id="${id}Btn">📷 ${val ? 'Заменить фото' : 'Выбрать фото'}</button>
+    ${val ? `<button type="button" class="btn btn-light" id="${id}Rm" style="min-height:46px;font-size:15px">Убрать фото</button>` : ''}</div></div>
+    <input type="hidden" id="${id}" value="${esc(val)}"></div>`;
+}
+function bindPhoto(id) {
+  $('#' + id + 'Btn').onclick = () => pickPhoto(url => {
+    $('#' + id).value = url; const p = $('#' + id + 'Prev'); p.style.backgroundImage = `url('${view(url)}')`; p.textContent = '';
+    $('#' + id + 'Btn').textContent = '📷 Заменить фото';
+  }, true);
+  const rm = $('#' + id + 'Rm');
+  if (rm) rm.onclick = () => { $('#' + id).value = ''; const p = $('#' + id + 'Prev'); p.style.backgroundImage = ''; p.textContent = 'Нет фото'; rm.remove(); };
+}
+const photoVal = id => $('#' + id).value;
+let onPicked = null;
+function pickPhoto(cb) { onPicked = cb; const f = $('#filePick'); f.value = ''; f.click(); }
+$('#filePick').addEventListener('change', async e => {
+  const file = e.target.files[0]; if (!file || !onPicked) return;
+  busy(true, 'Загружаю фото… Не закрывайте страницу');
+  let url;
+  try {
+    const b64 = await shrink(file);
+    url = await call('uploadPhoto', PIN, b64, file.name.replace(/\.\w+$/, '') + '.jpg');
+  } catch (err) { busy(false); return toast('Не получилось загрузить фото. Попробуйте ещё раз.', true); }
+  busy(false);
+  try { await onPicked(url); } catch (err) { /* сообщение об ошибке уже показано */ }
+});
+// Уменьшаем фото на телефоне до 1600 px — загружается быстро даже по мобильному интернету
+function shrink(file) {
+  return new Promise((ok, fail) => {
+    const img = new Image(), r = new FileReader();
+    r.onload = () => { img.src = r.result; };
+    r.onerror = fail;
+    img.onload = () => {
+      const k = Math.min(1, 1600 / Math.max(img.width, img.height));
+      const c = document.createElement('canvas'); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      ok(c.toDataURL('image/jpeg', .85).split(',')[1]);
+    };
+    img.onerror = () => fail(new Error('Это не фото'));
+    r.readAsDataURL(file);
+  });
+}
+
+/* ================== ОКНО ================== */
+function openSheet(html) { $('#sheetPanel').innerHTML = html; $('#sheetPanel').onclick = null; $('#sheet').classList.remove('hidden'); $('#sheetPanel').scrollTop = 0; document.body.style.overflow = 'hidden'; }
+function closeSheet() { $('#sheet').classList.add('hidden'); document.body.style.overflow = ''; }
+$('#sheet').addEventListener('click', e => { if (e.target.id === 'sheet') closeSheet(); });
+document.addEventListener('input', e => { const f = e.target.closest('.field'); if (f) f.classList.remove('err'); });
+
+function openHelp() {
+  openSheet(`<h2>Как пользоваться</h2><ol class="steps">
+    <li>Нажмите на раздел, который хотите поменять: расписание, новости, фото…</li>
+    <li>У нужной карточки нажмите «✏️ Изменить», или зелёную кнопку внизу, чтобы добавить новое.</li>
+    <li>Заполните поля. Фото выбирается кнопкой «📷» прямо из галереи телефона.</li>
+    <li>Нажмите «✅ Сохранить». Через минуту изменения появятся на сайте.</li>
+  </ol>
+  <div class="hint" style="margin-top:16px"><b>🙂</b><div>Сломать сайт отсюда нельзя. Если что-то пошло не так — просто исправьте и сохраните ещё раз.</div></div>
+  <div class="form-acts"><button class="btn btn-main" onclick="closeSheet()">Понятно</button></div>`);
+}
+
+/* ================== СТАРТ ================== */
+(async () => {
+  if (!LIVE) $('#demoBar').classList.remove('hidden');
+  const saved = store.get('pult-pin');
+  if (saved) { try { await enter(saved); return; } catch (e) { store.set('pult-pin', null); } }
+  show('login');
+})();
 </script>
 </body>
 </html>
