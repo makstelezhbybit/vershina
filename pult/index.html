@@ -219,15 +219,16 @@ const Demo = (() => {
     news: [{date: '26 августа 2026', title: 'Открыт набор в действующие и новые группы', photo: 'assets/img/news-nabor.jpg', link: ''}],
     achievements: [{date: 'Сен 2026', name: 'Открытый турнир по боксу памяти Г.Ф. Кучеренко', details: 'Бокс · Мазальков Тимур', result: '2 место', photo: 'assets/img/ach-box.jpg', link: ''}],
     gallery: [{photo: 'assets/img/g1.jpg', caption: 'Тренер поднимает руку победителя'}, {photo: 'assets/img/g2.jpg', caption: 'Борьба в партере'}],
+    coaches: [{photo: 'assets/img/coach-denis.webp', name: 'Денис Новиков', role: 'Основатель · Главный тренер ММА', desc: 'Основатель клуба «Вершина».', tags: 'ММА, Президент ФСБЕ ММА', insta: ''}],
     photos: {team: 'assets/img/team.jpg', mma: 'assets/img/mma.jpg', box: 'assets/img/box.jpg', denis: 'assets/img/coach-denis.webp', anton: 'assets/img/coach-anton.jpg'}
   };
   let db; try { db = JSON.parse(localStorage.getItem('pult-demo')); } catch (e) {}
   if (!db) db = JSON.parse(JSON.stringify(seed));
-  const keys = [['team', 'Фото команды (раздел «О клубе»)'], ['mma', 'Карточка «ММА»'], ['box', 'Карточка «Бокс»'], ['denis', 'Тренер Денис'], ['anton', 'Тренер Антон']];
+  const keys = [['team', 'Фото команды (раздел «О клубе»)'], ['mma', 'Карточка «ММА»'], ['box', 'Карточка «Бокс»']];
   const out = () => {
     try { localStorage.setItem('pult-demo', JSON.stringify(db)); } catch (e) {}
     const d = JSON.parse(JSON.stringify(db));
-    ['schedule', 'extras', 'news', 'achievements', 'gallery'].forEach(k => d[k].forEach((x, i) => x._row = i + 2));
+    ['schedule', 'extras', 'news', 'achievements', 'gallery', 'coaches'].forEach(k => d[k].forEach((x, i) => x._row = i + 2));
     return Object.assign(d, {photoKeys: keys, siteUrl: '../'});
   };
   const wait = v => new Promise(r => setTimeout(() => r(v), 350));
@@ -297,10 +298,11 @@ $('#logout').onclick = () => { if (confirm('Выйти из пульта на э
 const SECTIONS = {
   announce:     {ic: '📣', title: 'Объявление', sub: d => d.announce.show ? '🟢 Сейчас показано' : '⚪ Сейчас выключено'},
   schedule:     {ic: '📅', title: 'Расписание', sub: d => d.schedule.length + ' ' + plural(d.schedule.length, 'группа', 'группы', 'групп')},
+  coaches:      {ic: '🥋', title: 'Тренеры', sub: d => (d.coaches || []).length + ' ' + plural((d.coaches || []).length, 'тренер', 'тренера', 'тренеров')},
   news:         {ic: '📰', title: 'Новости', sub: d => d.news.length + ' ' + plural(d.news.length, 'новость', 'новости', 'новостей')},
   achievements: {ic: '🏆', title: 'Достижения', sub: d => d.achievements.length + ' ' + plural(d.achievements.length, 'турнир', 'турнира', 'турниров')},
   gallery:      {ic: '🖼️', title: 'Галерея', sub: d => d.gallery.length + ' из 7 фото'},
-  photos:       {ic: '📷', title: 'Фото на сайте', sub: () => 'Команда, ММА, бокс, тренеры'}
+  photos:       {ic: '📷', title: 'Фото на сайте', sub: () => 'Команда, ММА, бокс'}
 };
 function plural(n, a, b, c) { n = Math.abs(n) % 100; const m = n % 10; if (n > 10 && n < 20) return c; if (m > 1 && m < 5) return b; if (m === 1) return a; return c; }
 function renderHome() {
@@ -317,7 +319,7 @@ document.addEventListener('click', e => {
 /* ================== РАЗДЕЛЫ ================== */
 function openSection(k) {
   CUR = k; $('#scrTitle').textContent = SECTIONS[k].title;
-  ({announce: drawAnnounce, schedule: drawSchedule, news: drawNews, achievements: drawAch, gallery: drawGallery, photos: drawPhotos})[k]();
+  ({announce: drawAnnounce, schedule: drawSchedule, coaches: drawCoaches, news: drawNews, achievements: drawAch, gallery: drawGallery, photos: drawPhotos})[k]();
   show('screen');
 }
 function redraw() { if (CUR !== 'home') openSectionKeepScroll(CUR); }
@@ -433,6 +435,32 @@ function editExtra(row) {
   $('#xSave').onclick = async () => {
     const title = $('#xT').value.trim(); if (!title) return $('#fT').classList.add('err');
     await run('saveItem', ['extras', row || null, {title, text: $('#xD').value.trim()}], SAVED); closeSheet(); redraw();
+  };
+}
+
+/* ---------- Тренеры ---------- */
+function drawCoaches() {
+  const list = D.coaches || [];
+  addBtn('＋ Добавить тренера', () => editCoach());
+  $('#scrBody').innerHTML = hint('🥋', 'Карточки тренеров на сайте — в этом порядке. Новый тренер: зелёная кнопка внизу. Ушёл из клуба — кнопка 🗑.') +
+    (list.map((c, i) => `<div class="item"><div class="thumb" ${bg(c.photo)}></div><div class="body"><div class="t">${esc(c.name)}</div><div class="s">${esc(c.role)}</div>
+      <div class="acts"><button class="act" onclick="editCoach(${c._row})">✏️ Изменить</button><button class="act del" onclick="del('coaches',${c._row},'тренера «${esc(c.name).replace(/'/g, '')}»')">🗑</button>${moveBtns('coaches', c._row, i, list.length)}</div></div></div>`).join('') || '<div class="empty">Тренеров пока нет</div>');
+}
+function editCoach(row) {
+  const c = row ? D.coaches.find(x => x._row === row) : {photo: '', name: '', role: '', desc: '', tags: '', insta: ''};
+  openSheet(`<h2>${row ? 'Изменить тренера' : 'Новый тренер'}</h2>
+    ${photoField('cP', c.photo).replace('Необязательно, но с фото новость смотрится лучше', 'Лучше вертикальное фото, где хорошо видно лицо')}
+    <div class="field" id="fCN"><label>Имя и фамилия</label><input type="text" id="cN" value="${esc(c.name)}" placeholder="Иван Иванов"><div class="errmsg">Напишите имя тренера</div></div>
+    <div class="field"><label>Должность</label><div class="help">Например: Тренер по боксу</div><input type="text" id="cR" value="${esc(c.role)}" placeholder="Тренер по ММА"></div>
+    <div class="field"><label>Пара слов о тренере</label><div class="help">Опыт, титулы, чему учит</div><textarea id="cD" maxlength="300" placeholder="Мастер спорта по боксу, 10 лет тренерского опыта…">${esc(c.desc)}</textarea></div>
+    <div class="field"><label>Короткие метки</label><div class="help">Через запятую. Например: Бокс, КМС, 10 лет опыта</div><input type="text" id="cT" value="${esc(c.tags)}" placeholder="Бокс, 10 лет опыта"></div>
+    <div class="field"><label>Instagram (необязательно)</label><input type="url" id="cI" value="${esc(c.insta)}" placeholder="https://instagram.com/…"></div>
+    <div class="form-acts"><button class="btn btn-main" id="cSave">✅ Сохранить</button><button class="btn btn-light" onclick="closeSheet()">Отмена</button></div>`);
+  bindPhoto('cP');
+  $('#cSave').onclick = async () => {
+    const name = $('#cN').value.trim(); if (!name) return $('#fCN').classList.add('err');
+    await run('saveItem', ['coaches', row || null, {photo: photoVal('cP'), name, role: $('#cR').value.trim(), desc: $('#cD').value.trim(), tags: $('#cT').value.trim(), insta: $('#cI').value.trim()}], SAVED);
+    closeSheet(); redraw();
   };
 }
 

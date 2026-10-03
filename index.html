@@ -605,14 +605,14 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
       </div>
       <div>
         <p class="statement" id="statement">Не просто зал. Среда воспитания. Здесь растят характер — в зале, на ринге и в жизни.</p>
-        <p class="about-text rv">«Вершина» — бойцовский клуб в Кропоткине. Четыре года мы тренируем детей с 5 лет и взрослых по ММА и боксу. Групповые и персональные тренировки, чёткое разделение на начинающих и тех, кто занимается профессионально. Наши воспитанники — победители и призёры международных, всероссийских, окружных и краевых турниров.</p>
+        <p class="about-text rv">«Вершина» — бойцовский клуб в Кропоткине. Три года мы тренируем детей с 5 лет и взрослых по ММА и боксу. Групповые и персональные тренировки, чёткое разделение на начинающих и тех, кто занимается профессионально. Наши воспитанники — победители и призёры международных, всероссийских, окружных и краевых турниров.</p>
       </div>
     </div>
 
     <figure class="about-photo fade"><img src="assets/img/team.jpg" alt="Команда клуба «Вершина» с флагом клуба на турнире"></figure>
 
     <div class="stats">
-      <div class="stat rv"><div class="stat-n"><span class="count" data-to="4">0</span><sup>года</sup></div><div class="stat-l">клубу «Вершина»</div></div>
+      <div class="stat rv"><div class="stat-n"><span class="count" data-to="3">0</span><sup>года</sup></div><div class="stat-l">клубу «Вершина»</div></div>
       <div class="stat rv"><div class="stat-n"><span class="count" data-to="9">0</span></div><div class="stat-l">групп по возрасту и уровню</div></div>
       <div class="stat rv"><div class="stat-n"><span class="count" data-to="19">0</span></div><div class="stat-l">медалей на одном турнире — KRW31, 2026</div></div>
       <div class="stat rv"><div class="stat-n"><span class="count" data-to="5">0</span><sup class="plus">+</sup></div><div class="stat-l">лет — с этого возраста берём детей</div></div>
@@ -1162,8 +1162,15 @@ document.querySelectorAll('.qa').forEach(q => {
     // Фото разделов
     const p = d.photos || {};
     setImg($('.about-photo img'), p.team);
-    const imgs = document.querySelectorAll('.coach-img img');
-    setImg(imgs[0], p.denis); setImg(imgs[1], p.anton);
+    // Тренеры: карточки целиком из пульта
+    if (d.coaches && d.coaches.length) {
+      $('.coaches').innerHTML = d.coaches.map(c => {
+        const tags = String(c.tags || '').split(',').map(t => t.trim()).filter(Boolean).map(t => `<span>${esc(t)}</span>`).join('');
+        const ig = c.insta ? `<a href="${esc(c.insta)}" target="_blank" rel="noopener">Instagram</a>` : '';
+        return `<article class="coach"><div class="coach-img">${c.photo ? `<img src="${esc(c.photo)}" alt="${esc(c.name)}">` : ''}</div><div class="coach-info"><div class="coach-role">${esc(c.role)}</div><div class="coach-name">${esc(c.name)}</div>${c.desc ? `<p class="coach-desc">${esc(c.desc)}</p>` : ''}${tags || ig ? `<div class="coach-tags">${tags}${ig}</div>` : ''}</div></article>`;
+      }).join('');
+      document.querySelectorAll('.coach-img img').forEach(fixImg);
+    }
     const bgs = document.querySelectorAll('.dir-bg');
     if (p.mma && bgs[0]) bgs[0].style.setProperty('--ph', `url("${p.mma}") center/cover`);
     if (p.box && bgs[1]) bgs[1].style.setProperty('--ph', `url("${p.box}") center/cover`);
